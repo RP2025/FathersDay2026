@@ -1,8 +1,8 @@
 /* Cassette player page logic */
 (function playerApp() {
   const TAPES = {
-    1: { title: 'Shukriya Papa',           audio: 'papa1.mp3', cover: 'papa1.jpg', color: '#e8a4c8' },
-    2: { title: 'Aapse Seekhe Hue Sawaal', audio: "papa2.mp3", cover: 'papas2.jpg', color: '#7eb8e8' },
+    1: { title: 'Shukriya Papa',           audio: 'papaa2.mp3', cover: 'papaa2.jpg', color: '#e8a4c8' },
+    2: { title: 'Aapse Seekhe Hue Sawaal', audio: 'papa2.mp3', cover: 'papa2.jpg', color: '#7eb8e8' },
     3: { title: 'Aapse Himmat Mili',       audio: 'papa3.mp3', cover: 'papa3.jpg', color: '#f5d78e' }
   };
 
@@ -19,11 +19,11 @@
   const reelL      = $('reel-l');
   const reelR      = $('reel-r');
   const playerLed  = $('player-led');
-  const btnPlay    = $('btn-play');
-  const btnPause   = $('btn-pause');
-  const btnBack    = $('btn-back');
-  const btnForward = $('btn-forward');
-  const btnEject   = $('btn-eject');
+  const btnPlay      = $('btn-play');
+  const btnPause     = $('btn-pause');
+  const btnSeekBack  = $('btn-seek-back');
+  const btnSeekFwd   = $('btn-seek-fwd');
+  const btnEject     = $('btn-eject');
 
   let currentId = null;
   let busy = false;
@@ -60,17 +60,25 @@
 
   function setControls(playing) {
     const has = !!currentId;
-    
-    // Play button active if tape is in and NOT playing
-    btnPlay.disabled    = !has || playing || busy;
-    
-    // Pause button active if tape is in AND currently playing
-    btnPause.disabled   = !has || !playing || busy;
-    
-    // Skip buttons stay active in BOTH states as long as a tape is inserted
-    btnBack.disabled    = !has || busy;
-    btnForward.disabled = !has || busy;
-    btnEject.disabled   = !has || busy;
+    btnPlay.disabled      = !has || playing;
+    btnPause.disabled     = !has || !playing;
+    btnEject.disabled     = !has || busy;
+    btnSeekBack.hidden    = !has;
+    btnSeekFwd.hidden     = !has;
+    btnSeekBack.disabled  = !has || busy;
+    btnSeekFwd.disabled   = !has || busy;
+  }
+
+  function seekSeconds(delta) {
+    if (!currentId || busy) return;
+    const duration = audio.duration;
+    let t = audio.currentTime + delta;
+    if (Number.isFinite(duration)) {
+      t = Math.max(0, Math.min(duration, t));
+    } else {
+      t = Math.max(0, t);
+    }
+    audio.currentTime = t;
   }
 
   function fadeImg(img, src) {
@@ -141,6 +149,7 @@
     currentId = id;
     hideTape(id);
     updateDisplay(tape);
+    setControls(false);
 
     playerCas.classList.add('inserting');
     await wait(700);
@@ -152,12 +161,11 @@
 
     try {
       await audio.play();
-      // The native audio 'play' event listener below will automatically set reels and control state
-    } catch (e) {
-      setReels(false);
-      setControls(false);
-    }
+      setReels(true);
+    } catch (e) {}
     busy = false;
+    setControls(!audio.paused && !audio.ended);
+    if (audio.paused && currentId) btnPlay.disabled = false;
   }
 
   async function ejectTape() {
@@ -173,8 +181,8 @@
     showTape(currentId);
     currentId = null;
     clearDisplay();
-    setControls(false);
     busy = false;
+    setControls(false);
   }
 
   function overPlayer(cx, cy) {
@@ -231,45 +239,31 @@
 
   document.querySelectorAll('.pool-tape').forEach(setupDrag);
 
-  // ── CONTROL BUTTON EVENT HANDLERS ──
   btnPlay.addEventListener('click', function () {
-    if (!currentId || busy) return;
-    audio.play().catch(function () {});
+    if (!currentId) return;
+    audio.play().then(function () { setReels(true); setControls(true); }).catch(function () {});
   });
 
   btnPause.addEventListener('click', function () {
-    if (!currentId || busy) return;
     audio.pause();
-  });
-
-  btnBack.addEventListener('click', function () {
-    if (!currentId || busy) return;
-    audio.currentTime = Math.max(0, audio.currentTime - 10);
-  });
-
-  btnForward.addEventListener('click', function () {
-    if (!currentId || busy) return;
-    audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 10);
-  });
-
-  btnEject.addEventListener('click', function () { ejectTape(); });
-
-  // ── NATIVE AUDIO ENGINE STATE SYNCHRONIZATION ──
-  audio.addEventListener('play', function () {
-    if (busy) return;
-    setReels(true);
-    setControls(true);
-  });
-
-  audio.addEventListener('pause', function () {
-    if (busy) return;
     setReels(false);
     setControls(false);
+    btnPlay.disabled = false;
   });
+
+  btnSeekBack.addEventListener('click', function () { seekSeconds(-10); });
+  btnSeekFwd.addEventListener('click', function () { seekSeconds(10); });
+
+  btnEject.addEventListener('click', function () { ejectTape(); });
 
   audio.addEventListener('ended', function () {
     setReels(false);
     setControls(false);
+    btnPlay.disabled = false;
+  });
+
+  audio.addEventListener('pause', function () {
+    if (!audio.ended && !busy) setReels(false);
   });
 
   if ('serviceWorker' in navigator) {
