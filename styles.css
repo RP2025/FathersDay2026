@@ -570,6 +570,19 @@ body.on-table #sky-canvas {
   box-shadow: 0 4px 16px rgba(232, 164, 200, 0.3);
 }
 
+.ctrl-skip {
+  background: linear-gradient(135deg, rgba(245, 215, 142, 0.15), rgba(245, 215, 142, 0.05));
+  color: var(--gold);
+  border: 1px solid rgba(245, 215, 142, 0.3);
+  font-size: 0.65rem;
+  padding: 0.55rem 0.75rem;
+}
+
+.ctrl-skip:not(:disabled):hover {
+  background: linear-gradient(135deg, rgba(245, 215, 142, 0.25), rgba(245, 215, 142, 0.1));
+  border-color: var(--gold);
+}
+
 .ctrl-eject {
   background: rgba(255, 255, 255, 0.08);
   color: var(--muted);
