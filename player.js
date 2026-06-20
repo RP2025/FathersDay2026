@@ -60,8 +60,13 @@
 
   function setControls(playing) {
     const has = !!currentId;
+    // Play button is active as long as a tape is loaded AND it's not already playing
     btnPlay.disabled    = !has || playing;
+    
+    // Pause button is active as long as a tape is loaded AND it's currently playing
     btnPause.disabled   = !has || !playing;
+    
+    // Skip buttons are now active in BOTH play and pause states (only disabled if no tape or busy)
     btnBack.disabled    = !has || busy;
     btnForward.disabled = !has || busy;
     btnEject.disabled   = !has || busy;
