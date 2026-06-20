@@ -537,6 +537,7 @@ body.on-table #sky-canvas {
 
 .player-controls {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   justify-content: center;
   margin-top: 0.75rem;
@@ -574,6 +575,14 @@ body.on-table #sky-canvas {
   background: rgba(255, 255, 255, 0.08);
   color: var(--muted);
   border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.ctrl-seek {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 0.55rem 0.75rem;
+  font-size: 0.7rem;
 }
 
 /* ── POOL CASSETTES (3D) ── */
