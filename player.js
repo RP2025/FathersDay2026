@@ -60,13 +60,14 @@
 
   function setControls(playing) {
     const has = !!currentId;
-    // Play button is active as long as a tape is loaded AND it's not already playing
-    btnPlay.disabled    = !has || playing;
     
-    // Pause button is active as long as a tape is loaded AND it's currently playing
-    btnPause.disabled   = !has || !playing;
+    // Play button active if tape is in and NOT playing
+    btnPlay.disabled    = !has || playing || busy;
     
-    // Skip buttons are now active in BOTH play and pause states (only disabled if no tape or busy)
+    // Pause button active if tape is in AND currently playing
+    btnPause.disabled   = !has || !playing || busy;
+    
+    // Skip buttons stay active in BOTH states as long as a tape is inserted
     btnBack.disabled    = !has || busy;
     btnForward.disabled = !has || busy;
     btnEject.disabled   = !has || busy;
@@ -151,11 +152,10 @@
 
     try {
       await audio.play();
-      setReels(true);
-      setControls(true);
+      // The native audio 'play' event listener below will automatically set reels and control state
     } catch (e) {
+      setReels(false);
       setControls(false);
-      btnPlay.disabled = false;
     }
     busy = false;
   }
@@ -231,38 +231,45 @@
 
   document.querySelectorAll('.pool-tape').forEach(setupDrag);
 
+  // ── CONTROL BUTTON EVENT HANDLERS ──
   btnPlay.addEventListener('click', function () {
-    if (!currentId) return;
-    audio.play().then(function () { setReels(true); setControls(true); }).catch(function () {});
+    if (!currentId || busy) return;
+    audio.play().catch(function () {});
   });
 
   btnPause.addEventListener('click', function () {
+    if (!currentId || busy) return;
     audio.pause();
-    setReels(false);
-    setControls(false);
-    btnPlay.disabled = false;
   });
 
   btnBack.addEventListener('click', function () {
-    if (!currentId) return;
+    if (!currentId || busy) return;
     audio.currentTime = Math.max(0, audio.currentTime - 10);
   });
 
   btnForward.addEventListener('click', function () {
-    if (!currentId) return;
+    if (!currentId || busy) return;
     audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 10);
   });
 
   btnEject.addEventListener('click', function () { ejectTape(); });
 
-  audio.addEventListener('ended', function () {
-    setReels(false);
-    setControls(false);
-    btnPlay.disabled = false;
+  // ── NATIVE AUDIO ENGINE STATE SYNCHRONIZATION ──
+  audio.addEventListener('play', function () {
+    if (busy) return;
+    setReels(true);
+    setControls(true);
   });
 
   audio.addEventListener('pause', function () {
-    if (!audio.ended && !busy) setReels(false);
+    if (busy) return;
+    setReels(false);
+    setControls(false);
+  });
+
+  audio.addEventListener('ended', function () {
+    setReels(false);
+    setControls(false);
   });
 
   if ('serviceWorker' in navigator) {
