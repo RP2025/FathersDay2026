@@ -1,9 +1,9 @@
 /* Cassette player page logic */
 (function playerApp() {
   const TAPES = {
-    1: { title: 'Shukriya Papa',           audio: 'High Energy Cinematic Rap Anthem.mp3', cover: 'papa1.jpg', color: '#e8a4c8' },
-    2: { title: 'Aapse Seekhe Hue Sawaal', audio: "Papa's Special Day - Updated Outro.mp3", cover: 'papa2.jpg', color: '#7eb8e8' },
-    3: { title: 'Aapse Himmat Mili',       audio: 'Shikshak Papa - Bhairavi Rock Full.mp3', cover: 'papa3.jpg', color: '#f5d78e' }
+    1: { title: 'Shukriya Papa',           audio: 'papa1.mp3', cover: 'papa1.jpg', color: '#e8a4c8' },
+    2: { title: 'Aapse Seekhe Hue Sawaal', audio: "papa2.mp3", cover: 'papa2.jpg', color: '#7eb8e8' },
+    3: { title: 'Aapse Himmat Mili',       audio: 'papa3.mp3', cover: 'papa3.jpg', color: '#f5d78e' }
   };
 
   const $ = function (id) { return document.getElementById(id); };
