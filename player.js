@@ -19,9 +19,11 @@
   const reelL      = $('reel-l');
   const reelR      = $('reel-r');
   const playerLed  = $('player-led');
-  const btnPlay    = $('btn-play');
-  const btnPause   = $('btn-pause');
-  const btnEject   = $('btn-eject');
+  const btnPlay      = $('btn-play');
+  const btnPause     = $('btn-pause');
+  const btnSeekBack  = $('btn-seek-back');
+  const btnSeekFwd   = $('btn-seek-fwd');
+  const btnEject     = $('btn-eject');
 
   let currentId = null;
   let busy = false;
@@ -58,9 +60,25 @@
 
   function setControls(playing) {
     const has = !!currentId;
-    btnPlay.disabled  = !has || playing;
-    btnPause.disabled = !has || !playing;
-    btnEject.disabled = !has || busy;
+    btnPlay.disabled      = !has || playing;
+    btnPause.disabled     = !has || !playing;
+    btnEject.disabled     = !has || busy;
+    btnSeekBack.hidden    = !has;
+    btnSeekFwd.hidden     = !has;
+    btnSeekBack.disabled  = !has || busy;
+    btnSeekFwd.disabled   = !has || busy;
+  }
+
+  function seekSeconds(delta) {
+    if (!currentId || busy) return;
+    const duration = audio.duration;
+    let t = audio.currentTime + delta;
+    if (Number.isFinite(duration)) {
+      t = Math.max(0, Math.min(duration, t));
+    } else {
+      t = Math.max(0, t);
+    }
+    audio.currentTime = t;
   }
 
   function fadeImg(img, src) {
@@ -131,6 +149,7 @@
     currentId = id;
     hideTape(id);
     updateDisplay(tape);
+    setControls(false);
 
     playerCas.classList.add('inserting');
     await wait(700);
@@ -143,12 +162,10 @@
     try {
       await audio.play();
       setReels(true);
-      setControls(true);
-    } catch (e) {
-      setControls(false);
-      btnPlay.disabled = false;
-    }
+    } catch (e) {}
     busy = false;
+    setControls(!audio.paused && !audio.ended);
+    if (audio.paused && currentId) btnPlay.disabled = false;
   }
 
   async function ejectTape() {
@@ -164,8 +181,8 @@
     showTape(currentId);
     currentId = null;
     clearDisplay();
-    setControls(false);
     busy = false;
+    setControls(false);
   }
 
   function overPlayer(cx, cy) {
@@ -233,6 +250,9 @@
     setControls(false);
     btnPlay.disabled = false;
   });
+
+  btnSeekBack.addEventListener('click', function () { seekSeconds(-10); });
+  btnSeekFwd.addEventListener('click', function () { seekSeconds(10); });
 
   btnEject.addEventListener('click', function () { ejectTape(); });
 
