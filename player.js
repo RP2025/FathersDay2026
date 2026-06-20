@@ -1,7 +1,7 @@
 /* Cassette player page logic */
 (function playerApp() {
   const TAPES = {
-    1: { title: 'Shukriya Papa',           audio: 'papaa2.mp3', cover: 'papa1.jpg', color: '#e8a4c8' },
+    1: { title: 'Shukriya Papa',           audio: 'papaa2.mp3', cover: 'papaa2.jpg', color: '#e8a4c8' },
     2: { title: 'Aapse Seekhe Hue Sawaal', audio: 'papa2.mp3', cover: 'papa2.jpg', color: '#7eb8e8' },
     3: { title: 'Aapse Himmat Mili',       audio: 'papa3.mp3', cover: 'papa3.jpg', color: '#f5d78e' }
   };
